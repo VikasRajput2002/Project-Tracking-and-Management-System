@@ -1,7 +1,7 @@
 import secrets
 import os
 from PIL import Image
-from flask import render_template, url_for, flash, redirect, request,session
+from flask import render_template, url_for, flash, redirect, request,session,abort
 from managment import app, db, bcrypt, mail
 from managment.form import RegistrationForm, LoginForm, UpdateAccountForm, ProjectForm,TaskForm,TeamForm
 from managment.models import User, Project,Task,works
@@ -196,10 +196,13 @@ def team(project_id = None):
         email_id = form.email.data
         user = User.query.filter(User.email == email_id).first()
         # w = works(user_id=user.id, project_id=project_id)
-        stmnt = works.insert().values(user_id=user.id, project_id=project_id)
-        db.session.execute(stmnt) 
-        db.session.commit()
-        return redirect(url_for('team',project_id=project_id))
+        if(user):
+            stmnt = works.insert().values(user_id=user.id, project_id=project_id)
+            db.session.execute(stmnt) 
+            db.session.commit()
+            return redirect(url_for('team',project_id=project_id))
+        else:
+            pass
     return render_template('team.html',form=form,users=users, project_id=project_id)
 
 @app.route("/message", methods=['GET', 'POST'])
